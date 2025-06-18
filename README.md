@@ -1,2 +1,2 @@
-# DIP
-期末项目
+# Digital_Image_Processing
+数字图像处理期末项目
