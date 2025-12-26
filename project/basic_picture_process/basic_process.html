@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>图像处理</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: #f4f6fa;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .basic-main-container {
+            max-width: 1200px;
+            width: 100%;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 50px;
+        }
+
+        h1 {
+            color: #2d3a4b;
+            margin-bottom: 40px;
+            font-size: 32px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .basic-content-wrapper {
+            display: flex;
+            gap: 40px;
+        }
+
+        .basic-left-section,
+        .basic-right-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .basic-section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .basic-image-container {
+            flex-grow: 1;
+            min-height: 400px;
+            background-color: #f9fafb;
+            border-radius: 12px;
+            border: 2px dashed #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .basic-image-container:hover {
+            border-color: #9ca3af;
+        }
+
+        .basic-image-container img {
+            max-width: 100%;
+            max-height: 450px;
+            object-fit: contain;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .basic-controls {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .basic-options {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        select, input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin: 0 8px;
+            font-size: 14px;
+        }
+
+        input[type=file] {
+            display: none;
+        }
+
+        .basic-custom-file-upload {
+            border: 2px solid #3b82f6;
+            color: #3b82f6;
+            background-color: white;
+            padding: 12px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin: 0 8px;
+        }
+
+        .basic-custom-file-upload:hover {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        button {
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 14px 40px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 8px;
+            font-weight: 500;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        }
+
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        }
+
+        .basic-empty-state {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 18px;
+        }
+
+        .basic-error-message {
+            color: #ef4444;
+            font-size: 18px;
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .basic-content-wrapper {
+                flex-direction: column;
+            }
+
+            .basic-main-container {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 28px;
+                margin-bottom: 30px;
+            }
+
+            .basic-image-container {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="basic-main-container">
+        <h1>图像处理系统</h1>
+        <div class="basic-content-wrapper">
+            <div class="basic-left-section">
+                <div class="basic-section-title">原始图片</div>
+                <div class="basic-image-container">
+                    <img id="basic-preview" src="" style="display:none;" />
+                    <div id="basic-empty-preview" class="basic-empty-state">点击下方按钮上传图片</div>
+                </div>
+            </div>
+            <div class="basic-right-section">
+                <div class="basic-section-title">处理结果</div>
+                <div class="basic-image-container">
+                    <img id="basic-result-image" src="" style="display:none;" />
+                    <div id="basic-empty-result" class="basic-empty-state">处理后显示结果</div>
+                </div>
+            </div>
+        </div>
+        <div class="basic-options">
+            <div style="margin-bottom: 20px;">
+                <label for="operation-select">选择操作：</label>
+                <select id="operation-select">
+                    <option value="rotate">旋转</option>
+                    <option value="resize">缩放</option>
+                    <option value="contrast">对比度</option>
+                    <option value="brightness">亮度</option>
+                    <option value="grayscale">灰度化</option>
+                    <option value="histogram">直方图均衡化</option>
+                    <option value="blur">高斯模糊</option>
+                    <option value="sharpen">锐化</option>
+                    <option value="noise">添加噪声</option>
+                    <option value="edge">边缘检测</option>
+                    <option value="morph">形态学操作</option>
+                </select>
+            </div>
+            <div id="params-container">
+                <!-- 参数输入区域将根据选择的操作动态更新 -->
+            </div>
+        </div>
+        <div class="basic-controls">
+            <label for="file-input" class="basic-custom-file-upload">
+                <i class="fa fa-upload mr-2"></i>选择图片
+            </label>
+            <input type="file" name="file" id="file-input" accept="image/*">
+            <button id="basic-process-btn">
+                <i class="fa fa-magic mr-2"></i>处理图片
+            </button>
+        </div>
+        <div id="basic-error-message" class="basic-error-message"></div>
+    </div>
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const basicPreview = document.getElementById('basic-preview');
+        const basicResultImage = document.getElementById('basic-result-image');
+        const basicProcessBtn = document.getElementById('basic-process-btn');
+        const basicEmptyPreview = document.getElementById('basic-empty-preview');
+        const basicEmptyResult = document.getElementById('basic-empty-result');
+        const basicErrorMessage = document.getElementById('basic-error-message');
+        const operationSelect = document.getElementById('operation-select');
+        const paramsContainer = document.getElementById('params-container');
+        let uploadedFileName = '';
+
+        // 操作参数配置
+        const operationParams = {
+            rotate: { angle: { type: 'number', label: '角度', default: 90 } },
+            resize: { scale_percent: { type: 'number', label: '缩放百分比', default: 50 } },
+            contrast: { alpha: { type: 'number', label: '对比度系数', default: 1.5 } },
+            brightness: { beta: { type: 'number', label: '亮度增量', default: 50 } },
+            blur: { kernel_size: { type: 'number', label: '核大小', default: 5 } },
+            noise: { noise_type: { type: 'select', label: '噪声类型', options: ['gaussian', 'salt_pepper'] } },
+            morph: { 
+                operation: { type: 'select', label: '操作类型', options: ['erode', 'dilate'] },
+                kernel_size: { type: 'number', label: '核大小', default: 3 }
+            }
+        };
+
+        // 更新参数输入区域
+        function updateParamsInputs() {
+            const operation = operationSelect.value;
+            const params = operationParams[operation] || {};
+            paramsContainer.innerHTML = '';
+
+            Object.entries(params).forEach(([key, config]) => {
+                const label = document.createElement('label');
+                label.textContent = config.label + ': ';
+                paramsContainer.appendChild(label);
+
+                if (config.type === 'select') {
+                    const select = document.createElement('select');
+                    select.name = key;
+                    config.options.forEach(option => {
+                        const optionEl = document.createElement('option');
+                        optionEl.value = option;
+                        optionEl.textContent = option;
+                        select.appendChild(optionEl);
+                    });
+                    paramsContainer.appendChild(select);
+                } else {
+                    const input = document.createElement('input');
+                    input.type = config.type;
+                    input.name = key;
+                    input.value = config.default || '';
+                    paramsContainer.appendChild(input);
+                }
+                paramsContainer.appendChild(document.createElement('br'));
+                paramsContainer.appendChild(document.createElement('br')); // 增加间距
+            });
+        }
+
+        operationSelect.addEventListener('change', updateParamsInputs);
+        updateParamsInputs();
+
+        fileInput.onchange = function () {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showError('请上传图片文件');
+                return;
+            }
+
+            hideError();
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            basicEmptyPreview.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 上传中...';
+
+            fetch('/', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        basicPreview.src = data.url;
+                        basicPreview.style.display = 'block';
+                        basicEmptyPreview.style.display = 'none';
+                        uploadedFileName = data.filename;
+                        basicProcessBtn.disabled = false;
+                    } else {
+                        showError('图片上传失败，请重试');
+                        basicEmptyPreview.innerHTML = '点击下方按钮上传图片';
+                    }
+                })
+                .catch(error => {
+                    showError('发生错误，请重试');
+                    basicEmptyPreview.innerHTML = '点击下方按钮上传图片';
+                    console.error('上传错误:', error);
+                });
+        };
+
+        basicProcessBtn.onclick = function () {
+            if (!uploadedFileName) {
+                showError('你还未导入图片');
+                return;
+            }
+
+            hideError();
+            this.disabled = true;
+            this.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>处理中...';
+
+            const operation = operationSelect.value;
+            const params = {};
+            const inputs = paramsContainer.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                if (input.type === 'number') {
+                    params[input.name] = parseFloat(input.value);
+                } else {
+                    params[input.name] = input.value;
+                }
+            });
+
+            fetch('/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    filename: uploadedFileName,
+                    operation: operation,
+                    params: params
+                })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        // 添加时间戳和随机数来防止缓存
+                        const timestamp = new Date().getTime();
+                        const random = Math.random();
+                        basicResultImage.src = data.url + '?t=' + timestamp + '&r=' + random;
+                        basicResultImage.style.display = 'block';
+                        basicEmptyResult.style.display = 'none';
+                    } else {
+                        showError(data.msg || '处理失败，请重试');
+                    }
+                    this.innerHTML = '<i class="fa fa-magic mr-2"></i>处理图片';
+                    this.disabled = false;
+                })
+                .catch(error => {
+                    showError('处理失败，请重试');
+                    this.innerHTML = '<i class="fa fa-magic mr-2"></i>处理图片';
+                    this.disabled = false;
+                    console.error('处理错误:', error);
+                });
+        };
+
+        function showError(message) {
+            basicErrorMessage.textContent = message;
+            basicErrorMessage.style.display = 'block';
+            setTimeout(() => {
+                basicErrorMessage.style.opacity = '1';
+            }, 10);
+        }
+
+        function hideError() {
+            basicErrorMessage.style.opacity = '0';
+            setTimeout(() => {
+                basicErrorMessage.style.display = 'none';
+            }, 300);
+        }
+    </script>
+</body>
+</html>

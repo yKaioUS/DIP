@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <title>细胞计数</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: #f4f6fa;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .cell-main-container {
+            max-width: 1200px;
+            width: 100%;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 50px;
+        }
+
+        h1 {
+            color: #2d3a4b;
+            margin-bottom: 40px;
+            font-size: 32px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .cell-content-wrapper {
+            display: flex;
+            gap: 40px;
+        }
+
+        .cell-left-section,
+        .cell-right-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cell-section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .cell-image-container {
+            flex-grow: 1;
+            min-height: 400px;
+            background-color: #f9fafb;
+            border-radius: 12px;
+            border: 2px dashed #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .cell-image-container:hover {
+            border-color: #9ca3af;
+        }
+
+        .cell-image-container img {
+            max-width: 100%;
+            max-height: 450px;
+            object-fit: contain;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .cell-image-container img:hover {
+            transform: scale(1.02);
+        }
+
+        .cell-controls {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        input[type=file] {
+            display: none;
+        }
+
+        .cell-custom-file-upload {
+            border: 2px solid #3b82f6;
+            color: #3b82f6;
+            background-color: white;
+            padding: 12px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin: 0 8px;
+        }
+
+        .cell-custom-file-upload:hover {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        button {
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 14px 40px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 8px;
+            font-weight: 500;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        }
+
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        }
+
+        #cell-result {
+            margin-top: 30px;
+            font-size: 24px;
+            color: #16a34a;
+            font-weight: bold;
+            text-align: center;
+            min-height: 34px;
+        }
+
+        .cell-empty-state {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 18px;
+        }
+
+        .cell-error-message {
+            color: #ef4444;
+            font-size: 18px;
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .cell-content-wrapper {
+                flex-direction: column;
+            }
+
+            .cell-main-container {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 28px;
+                margin-bottom: 30px;
+            }
+
+            .cell-image-container {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cell-main-container">
+        <h1>细胞计数系统</h1>
+        <div class="cell-content-wrapper">
+            <div class="cell-left-section">
+                <div class="cell-section-title">原始图片</div>
+                <div class="cell-image-container">
+                    <img id="cell-preview" src="" style="display:none;"/>
+                    <div id="cell-empty-preview" class="cell-empty-state">点击下方按钮上传图片</div>
+                </div>
+            </div>
+            <div class="cell-right-section">
+                <div class="cell-section-title">计数结果</div>
+                <div class="cell-image-container">
+                    <img id="cell-result-image" src="" style="display:none;"/>
+                    <div id="cell-empty-result" class="cell-empty-state">计数后显示处理结果</div>
+                </div>
+            </div>
+        </div>
+        <div class="cell-controls">
+            <label for="file-input" class="cell-custom-file-upload">
+                <i class="fa fa-upload mr-2"></i>选择图片
+            </label>
+            <input type="file" name="file" id="file-input" accept="image/*">
+            <button id="cell-count-btn">
+                <i class="fa fa-search mr-2"></i>细胞计数
+            </button>
+        </div>
+        <div id="cell-result"></div>
+        <div id="cell-error-message" class="cell-error-message"></div>
+    </div>
+    <script>
+        // 获取 DOM 元素
+        const fileInput = document.getElementById('file-input');
+        const cellPreview = document.getElementById('cell-preview');
+        const cellResultImage = document.getElementById('cell-result-image');
+        const cellCountBtn = document.getElementById('cell-count-btn');
+        const cellEmptyPreview = document.getElementById('cell-empty-preview');
+        const cellEmptyResult = document.getElementById('cell-empty-result');
+        const cellErrorMessage = document.getElementById('cell-error-message');
+        let uploadedFileName = '';
+
+        // 处理文件选择事件
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // 检查文件类型
+            if (!file.type.startsWith('image/')) {
+                showError('请上传图片文件');
+                return;
+            }
+
+            hideError();
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // 显示加载状态
+            cellEmptyPreview.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 上传中...';
+
+            // 上传文件
+            uploadFile(formData);
+        });
+
+        // 处理细胞计数按钮点击事件
+        cellCountBtn.addEventListener('click', () => {
+            if (!uploadedFileName) {
+                showError('你还未导入图片');
+                return;
+            }
+
+            hideError();
+            cellCountBtn.disabled = true;
+            cellCountBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>计数中...';
+
+            // 发起细胞计数请求
+            performCellCount(uploadedFileName);
+        });
+
+        // 上传文件函数
+        function uploadFile(formData) {
+            fetch('/', { method: 'POST', body: formData })
+              .then(response => response.json())
+              .then(data => {
+                    if (data.success) {
+                        cellPreview.src = data.url;
+                        cellPreview.style.display = 'block';
+                        cellEmptyPreview.style.display = 'none';
+                        uploadedFileName = data.filename;
+                        cellCountBtn.disabled = false;
+                        cellCountBtn.classList.add('bg-blue-600');
+                    } else {
+                        showError('图片上传失败，请重试');
+                        cellEmptyPreview.innerHTML = '点击下方按钮上传图片';
+                    }
+                })
+              .catch(error => {
+                    showError('发生错误，请重试');
+                    cellEmptyPreview.innerHTML = '点击下方按钮上传图片';
+                    console.error('上传错误:', error);
+                });
+        }
+
+        // 细胞计数函数
+        function performCellCount(filename) {
+            fetch('/cell_count', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename })
+            })
+              .then(response => response.json())
+              .then(data => {
+                    document.getElementById('cell-result').innerText = data.count;
+                    cellCountBtn.innerHTML = '<i class="fa fa-search mr-2"></i>细胞计数';
+
+                    // 显示处理后的细胞图像
+                    cellResultImage.src = '../result/cell_result.jpg?' + Date.now(); // 添加时间戳避免缓存
+                    cellResultImage.style.display = 'block';
+                    cellEmptyResult.style.display = 'none';
+
+                    setTimeout(() => {
+                        cellCountBtn.disabled = false;
+                    }, 1000);
+                })
+              .catch(error => {
+                    showError('计数失败，请重试');
+                    cellCountBtn.innerHTML = '<i class="fa fa-search mr-2"></i>细胞计数';
+                    cellCountBtn.disabled = false;
+                    console.error('计数错误:', error);
+                });
+        }
+
+        // 显示错误信息函数
+        function showError(message) {
+            cellErrorMessage.textContent = message;
+            cellErrorMessage.style.display = 'block';
+            setTimeout(() => {
+                cellErrorMessage.style.opacity = '1';
+            }, 10);
+        }
+
+        // 隐藏错误信息函数
+        function hideError() {
+            cellErrorMessage.style.opacity = '0';
+            setTimeout(() => {
+                cellErrorMessage.style.display = 'none';
+            }, 300);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>车牌识别plus</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background: #f4f6fa;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .car-main-container {
+            max-width: 1200px;
+            width: 100%;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 50px;
+        }
+
+        h1 {
+            color: #2d3a4b;
+            margin-bottom: 40px;
+            font-size: 32px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .car-content-wrapper {
+            display: flex;
+            gap: 40px;
+        }
+
+        .car-left-section,
+        .car-right-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .car-section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .car-image-container {
+            flex-grow: 1;
+            min-height: 400px;
+            background-color: #f9fafb;
+            border-radius: 12px;
+            border: 2px dashed #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .car-image-container:hover {
+            border-color: #9ca3af;
+        }
+
+        .car-image-container img {
+            max-width: 100%;
+            max-height: 450px;
+            object-fit: contain;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .car-image-container img:hover {
+            transform: scale(1.02);
+        }
+
+        .car-controls {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        input[type=file] {
+            display: none;
+        }
+
+        .car-custom-file-upload {
+            border: 2px solid #3b82f6;
+            color: #3b82f6;
+            background-color: white;
+            padding: 12px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin: 0 8px;
+        }
+
+        .car-custom-file-upload:hover {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        button {
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 14px 40px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 8px;
+            font-weight: 500;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        }
+
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        }
+
+        #car-result {
+            margin-top: 30px;
+            font-size: 24px;
+            color: #16a34a;
+            font-weight: bold;
+            text-align: center;
+            min-height: 34px;
+        }
+
+        .car-empty-state {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 18px;
+        }
+
+        .car-error-message {
+            color: #ef4444;
+            font-size: 18px;
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .car-content-wrapper {
+                flex-direction: column;
+            }
+
+            .car-main-container {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 28px;
+                margin-bottom: 30px;
+            }
+
+            .car-image-container {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="car-main-container">
+        <h1>车牌识别系统plus</h1>
+        <div class="car-content-wrapper">
+            <div class="car-left-section">
+                <div class="car-section-title">原始图片</div>
+                <div class="car-image-container">
+                    <img id="car-preview" src="" style="display:none;" />
+                    <div id="car-empty-preview" class="car-empty-state">点击下方按钮上传图片</div>
+                </div>
+            </div>
+            <div class="car-right-section">
+                <div class="car-section-title">识别结果</div>
+                <div class="car-image-container">
+                    <img id="car-result-image" src="" style="display:none;" />
+                    <div id="car-empty-result" class="car-empty-state">识别后显示处理结果</div>
+                </div>
+            </div>
+        </div>
+        <div class="car-controls">
+            <label for="file-input" class="car-custom-file-upload">
+                <i class="fa fa-upload mr-2"></i>选择图片
+            </label>
+            <input type="file" name="file" id="file-input" accept="image/*">
+            <button id="car-recognize-btn">
+                <i class="fa fa-search mr-2"></i>车牌识别
+            </button>
+        </div>
+        <div id="car-result"></div>
+        <div id="car-error-message" class="car-error-message"></div>
+    </div>
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const carPreview = document.getElementById('car-preview');
+        const carResultImage = document.getElementById('car-result-image');
+        const carRecognizeBtn = document.getElementById('car-recognize-btn');
+        const carEmptyPreview = document.getElementById('car-empty-preview');
+        const carEmptyResult = document.getElementById('car-empty-result');
+        const carErrorMessage = document.getElementById('car-error-message');
+        let uploadedFileName = '';
+
+        fileInput.onchange = function () {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // 检查文件类型
+            if (!file.type.startsWith('image/')) {
+                showError('请上传图片文件');
+                return;
+            }
+
+            hideError();
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // 显示加载状态
+            carEmptyPreview.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 上传中...';
+
+            fetch('/', { method: 'POST', body: formData })
+              .then(r => r.json())
+              .then(data => {
+                    if (data.success) {
+                        carPreview.src = data.url;
+                        carPreview.style.display = 'block';
+                        carEmptyPreview.style.display = 'none';
+                        uploadedFileName = data.filename;
+                        carRecognizeBtn.disabled = false;
+                        carRecognizeBtn.classList.add('bg-blue-600');
+                    } else {
+                        showError('图片上传失败，请重试');
+                        carEmptyPreview.innerHTML = '点击下方按钮上传图片';
+                    }
+                })
+              .catch(error => {
+                    showError('发生错误，请重试');
+                    carEmptyPreview.innerHTML = '点击下方按钮上传图片';
+                    console.error('上传错误:', error);
+                });
+        };
+
+        carRecognizeBtn.onclick = function () {
+            if (!uploadedFileName) {
+                showError('你还未导入图片');
+                return;
+            }
+
+            hideError();
+            this.disabled = true;
+            this.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>识别中...';
+
+            fetch('/recognize_plus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: uploadedFileName })
+            })
+              .then(r => r.json())
+              .then(data => {
+                    document.getElementById('car-result').innerText = data.result;
+                    this.innerHTML = '<i class="fa fa-search mr-2"></i>车牌识别';
+
+                    // 显示处理后的车牌图像
+                    carResultImage.src = '../result/car_plate.jpg?' + Date.now(); // 添加时间戳避免缓存
+                    carResultImage.style.display = 'block';
+                    carEmptyResult.style.display = 'none';
+
+                    setTimeout(() => {
+                        this.disabled = false;
+                    }, 1000);
+                })
+              .catch(error => {
+                    showError('识别失败，请重试');
+                    this.innerHTML = '<i class="fa fa-search mr-2"></i>车牌识别';
+                    this.disabled = false;
+                    console.error('识别错误:', error);
+                });
+        };
+
+        function showError(message) {
+            carErrorMessage.textContent = message;
+            carErrorMessage.style.display = 'block';
+            setTimeout(() => {
+                carErrorMessage.style.opacity = '1';
+            }, 10);
+        }
+
+        function hideError() {
+            carErrorMessage.style.opacity = '0';
+            setTimeout(() => {
+                carErrorMessage.style.display = 'none';
+            }, 300);
+        }
+    </script>
+</body>
+
+</html>
