@@ -1,4 +1,5 @@
 # Digital_Image_Processing
+华东师范大学软件工程数字图像处理期末项目
 
 ## About The Project
 This project is used as a image processing system, including the following three functions:
